@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MTG Commander League - Game Show Wheel</title>
+  <!-- SEO Meta Tags -->
+  <meta name="description"
+    content="A highly interactive, retro game show-themed spin wheel app for MTG Commander League challenges, rare bonus items, and neon celebration aesthetics.">
+  <meta name="author" content="Antigravity">
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Bungee&family=Inter:wght@400;500;700;900&family=Rubik+Mono+One&display=swap"
+    rel="stylesheet">
+
+  <!-- Styling -->
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  <!-- Neon Scanline Overlay for retro CRT vibe -->
+  <div class="crt-overlay"></div>
+
+  <!-- Fullscreen Celebration Canvas (Fireworks & Confetti) -->
+  <canvas id="celebration-canvas" class="fullscreen-canvas"></canvas>
+
+  <div class="app-container">
+    <!-- Collapsible Sidebar Configuration Drawer -->
+    <aside id="config-drawer" class="config-drawer">
+      <div class="drawer-header">
+        <h2>⚙️ BOARDROOM</h2>
+        <button id="close-drawer-btn" class="icon-btn" title="Close Settings">✕</button>
+      </div>
+
+      <div class="drawer-tabs">
+        <button id="tab-main-btn" class="tab-btn active">Main Wheel</button>
+        <button id="tab-bonus-btn" class="tab-btn">Bonus Wheel</button>
+        <button id="tab-sync-btn" class="tab-btn">Sync</button>
+      </div>
+
+      <div class="drawer-content">
+        <!-- Main Wheel Items Config -->
+        <div id="tab-main-content" class="tab-panel active">
+          <h3>Main Items</h3>
+          <p class="tab-help">Add items for the main wheel. Note: The <strong>Bonus Wheel</strong> segment is
+            permanently added!</p>
+          <div class="item-list-container">
+            <ul id="main-items-list" class="styled-list">
+              <!-- Dynamically populated -->
+            </ul>
+          </div>
+          <form id="add-main-item-form" class="add-form">
+            <input type="text" id="new-main-item" placeholder="Enter challenge or reward..." required maxlength="60">
+            <button type="submit" class="add-btn" title="Add to Main Wheel">➕ Add</button>
+          </form>
+        </div>
+
+        <!-- Bonus Wheel Items Config -->
+        <div id="tab-bonus-content" class="tab-panel">
+          <h3>Super Rare Items</h3>
+          <p class="tab-help">Options available when landing on the Super Awesome Bonus Wheel slot.</p>
+          <div class="item-list-container">
+            <ul id="bonus-items-list" class="styled-list">
+              <!-- Dynamically populated -->
+            </ul>
+          </div>
+          <form id="add-bonus-item-form" class="add-form">
+            <input type="text" id="new-bonus-item" placeholder="Enter rare item..." required maxlength="60">
+            <button type="submit" class="add-btn" title="Add to Bonus Wheel">➕ Add</button>
+          </form>
+        </div>
+
+        <!-- Sync Configurations -->
+        <div id="tab-sync-content" class="tab-panel">
+          <h3>Backup & Share</h3>
+          <p class="tab-help">Export or import your complete wheel configuration (Main and Bonus lists) as a JSON file.</p>
+          <button id="export-config-btn" class="pulse-btn"
+            style="width: 100%; margin-bottom: 16px; border-color: var(--neon-cyan); color: var(--neon-cyan); font-size: 0.85rem;">📤 Export Config</button>
+          
+          <div class="import-container"
+            style="border: 2px dashed var(--border-glass); padding: 15px; border-radius: 6px; text-align: center; background: rgba(0,0,0,0.25);">
+            <label for="import-file-input" class="pulse-btn"
+              style="display: inline-block; cursor: pointer; border-color: var(--neon-magenta); color: var(--neon-magenta); font-size: 0.8rem; padding: 8px 16px; margin-bottom: 8px;">📥 Choose File</label>
+            <input type="file" id="import-file-input" accept=".json" style="display: none;">
+            <div id="import-file-name" style="font-size: 0.75rem; color: #aaa; margin-bottom: 12px; word-break: break-all;">No file chosen</div>
+            <button id="import-config-btn" class="add-btn" style="width: 100%; display: none;">Apply Import</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="drawer-footer">
+        <div class="settings-group">
+          <div class="setting-row">
+            <label for="volume-slider">🔊 Volume</label>
+            <input type="range" id="volume-slider" min="0" max="100" value="50">
+          </div>
+          <div class="setting-row checkbox-row">
+            <label for="sound-toggle">Play SFX</label>
+            <input type="checkbox" id="sound-toggle" checked>
+          </div>
+        </div>
+        <button id="force-bonus-btn" class="pulse-btn"
+          style="width: 100%; margin-bottom: 12px; border-color: var(--neon-gold); color: var(--neon-gold); font-size: 0.8rem;">★
+          Force Bonus Wheel ★</button>
+        <button id="reset-defaults-btn" class="danger-btn">Reset Defaults</button>
+      </div>
+    </aside>
+
+    <!-- Main Game Show Stage -->
+    <main class="game-stage">
+      <header class="game-header">
+        <div class="logo-container">
+          <h1 class="neon-title" data-text="EDH SHOWDOWN">EDH LEAGUE</h1>
+          <span class="neon-subtitle">★ WHEEL OF DECKBUILDING ★</span>
+        </div>
+        <button id="open-drawer-btn" class="pulse-btn" title="Configure Wheel">⚙️ Setup Panel</button>
+      </header>
+
+      <!-- Scoreboard / Banner Display -->
+      <section class="scoreboard-container">
+        <div class="scoreboard-frame">
+          <div id="scoreboard-readout" class="scoreboard-readout marquee-glow">
+            SPIN THE WHEEL OF DESTINY!
+          </div>
+        </div>
+      </section>
+
+      <!-- The Wheel Cabinet Structure -->
+      <section class="wheel-stage-wrapper">
+        <div class="wheel-cabinet">
+          <!-- Outer Chasing Blinking Lights Frame -->
+          <div id="led-outer-ring" class="led-outer-ring">
+            <!-- Dynamically generated LED bulbs in CSS or JS -->
+          </div>
+
+          <!-- Physical Pointer/Ticker at the top -->
+          <div id="wheel-pointer" class="wheel-pointer"></div>
+
+          <!-- Canvas Wheel Element -->
+          <div class="canvas-container">
+            <canvas id="main-wheel-canvas" width="800" height="800"></canvas>
+          </div>
+        </div>
+      </section>
+
+      <!-- The Spin Controls -->
+      <section class="controls-stage">
+        <button id="spin-main-btn" class="arcade-spin-btn">
+          <span class="btn-cap">SPIN!</span>
+        </button>
+      </section>
+    </main>
+  </div>
+
+  <!-- Super Awesome Bonus Wheel Overlay / Modal -->
+  <div id="bonus-wheel-overlay" class="bonus-wheel-overlay hidden">
+    <!-- Flashing Backdrop Spotlights -->
+    <div class="spotlight spotlight-left"></div>
+    <div class="spotlight spotlight-right"></div>
+
+    <div class="bonus-cabinet-wrapper">
+      <div class="bonus-marquee">
+        <h2 class="bonus-title neon-rainbow">★ SUPER AWESOME ★</h2>
+        <h3 class="bonus-subtitle">BONUS WHEEL OF AWESOMENESS</h3>
+      </div>
+
+      <!-- Scoreboard for bonus outcomes -->
+      <div class="bonus-scoreboard">
+        <div id="bonus-scoreboard-readout" class="bonus-scoreboard-readout">
+          SPIN FOR RARE REWARDS!
+        </div>
+      </div>
+
+      <!-- Bonus Cabinet -->
+      <div class="bonus-wheel-cabinet">
+        <div id="bonus-led-ring" class="led-outer-ring gold-leds"></div>
+        <div class="wheel-pointer gold-pointer"></div>
+        <div class="canvas-container bonus-canvas-container">
+          <canvas id="bonus-wheel-canvas" width="450" height="450"></canvas>
+        </div>
+      </div>
+
+      <div class="bonus-controls">
+        <button id="spin-bonus-btn" class="arcade-spin-btn gold-btn">
+          <span class="btn-cap">SPIN!</span>
+        </button>
+        <button id="close-bonus-btn" class="text-link-btn disabled-btn" disabled>Return to Main Game</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- JS Logic -->
+  <script src="app.js"></script>
+</body>
+
+</html>
