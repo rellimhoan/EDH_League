@@ -2,7 +2,7 @@
    STATE & CONSTANTS
    ========================================================================== */
 const DEFAULT_MAIN_ITEMS = [
- "Penny Pinching Include any number  of cards worth 50 cents or less. (scryfall pricing)",
+  "Penny Pinching Include any number  of cards worth 50 cents or less. (scryfall pricing)",
   "Frugal Include up to 10 cards worth $1.00-$2.00. (scryfall pricing)",
   "Treat Yo'self - Include up to 5 cards worth between $2.01 and $10.00. (scryfall pricing)",
   "Money Pwease! Include up to one card that is above $50.00 from any set. (scryfall pricing)",
@@ -35,17 +35,23 @@ const DEFAULT_MAIN_ITEMS = [
   "That's cute. - You MUST Include one card All players agree is cute.",
   "Care Package - Include up to 5 (board wipes, card draw, ramp, removal",
   "Build A Card - You must present the custom card to the group and it may be vetoed if it's too powerful.",
-  "Thanks, I hate it - You MUST include 1 card your opponents all hate."
+  "Thanks, I hate it - You MUST include 1 card your opponents all hate.",
+  "Untapped Potential - Add up to 3 lands that can come into play untapped.",
+  "Utility Closet - Add up to 3 utility lands.",
+  "55 Burgers 55 Fries.. - You MUST include a card to that is a food or references food.",
+  "Turn and Face the Strange - You MUST include a card that has Mutate.",
+  "Finally Whippin - You MUST include one vehicle."
+
 ];
 
 const DEFAULT_BONUS_ITEMS = [
-  "★ WIN 20 LEAGUE POINTS ★",
-  "★ GET A PHYSICAL BOOSTER PACK ★",
-  "★ CHOOSE ANY CARD FROM YOUR BINDER ★",
-  "★ NO COMMANDER TAX NEXT GAME ★",
-  "★ TAKE AN EXTRA TURN IMMEDIATELY ★",
-  "★ STEAL A RANDOM BASIC LAND ★",
-  "★ FORWARD PASS A DAMAGE TRIGGER ★"
+  "Add 1 Banned Card",
+  "Add 1 Land Hate Card",
+  "Add as many Dual Lands as you want!",
+  "Add 1 Mox Card",
+  "Add Up to $100 worth of cards!",
+  "Add 1 $100 + value card.",
+  "Swap Commanders for one game!"
 ];
 
 // Color Palette for Slices
@@ -140,7 +146,7 @@ class AudioEngine {
     // Pitch sweep: starts high and goes low rapidly
     const startFreq = 800 * pitchFactor;
     const endFreq = 60 * pitchFactor;
-    
+
     osc.frequency.setValueAtTime(startFreq, now);
     osc.frequency.exponentialRampToValueAtTime(endFreq, now + 0.04);
 
@@ -161,7 +167,7 @@ class AudioEngine {
 
     const now = this.ctx.currentTime;
     const notes = [261.63, 329.63, 392.00, 523.25, 659.25, 783.99, 1046.50]; // C4, E4, G4, C5, E5, G5, C6
-    
+
     notes.forEach((freq, index) => {
       const startTime = now + index * 0.085;
       const duration = 0.25;
@@ -248,7 +254,7 @@ class AudioEngine {
       const bufferSize = this.ctx.sampleRate * 0.8; // 0.8 seconds
       const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
       const data = buffer.getChannelData(0);
-      
+
       // Populate with random white noise
       for (let i = 0; i < bufferSize; i++) {
         data[i] = Math.random() * 2 - 1;
@@ -363,7 +369,7 @@ function populateConfigLists() {
   bonusLi.style.border = "1px dashed var(--neon-gold)";
   bonusLi.style.background = "rgba(255,215,0,0.08)";
   bonusLi.innerHTML = `
-    <span style="color:var(--neon-gold); font-weight:700;">★ SUPER AWESOME BONUS WHEEL ★</span>
+    <span style="color:var(--neon-gold); font-weight:700;">★ RARE MODIFIERS ★</span>
     <span style="font-size: 0.7rem; color: #888; padding: 2px 6px;">PERMANENT</span>
   `;
   mainList.appendChild(bonusLi);
@@ -380,7 +386,7 @@ function populateConfigLists() {
 }
 
 // Global functions for list management (called from inline onclick)
-window.deleteMainItem = function(index) {
+window.deleteMainItem = function (index) {
   initAudio();
   soundEngine.playClick();
   state.mainItems.splice(index, 1);
@@ -390,7 +396,7 @@ window.deleteMainItem = function(index) {
   drawWheel(mainWheel, "main-wheel-canvas");
 };
 
-window.deleteBonusItem = function(index) {
+window.deleteBonusItem = function (index) {
   initAudio();
   soundEngine.playClick();
   state.bonusItems.splice(index, 1);
@@ -431,7 +437,7 @@ function calculateWheelGeometry() {
   } else {
     // Fallback if list is empty
     mainWheel.slices.push({
-      text: "No items! Add some in panel ⚙️",
+      text: "No drafting rules! Add some in panel ⚙️",
       start: 0,
       end: remainingAngle,
       color: "#333333",
@@ -442,7 +448,7 @@ function calculateWheelGeometry() {
 
   // Add the permanent Bonus segment at the end
   mainWheel.slices.push({
-    text: "★ BONUS WHEEL ★",
+    text: "★ RARE MODIFIERS ★",
     start: currentAngle,
     end: currentAngle + bonusAngle,
     color: BONUS_COLOR.bg,
@@ -470,7 +476,7 @@ function calculateWheelGeometry() {
     });
   } else {
     bonusWheel.slices.push({
-      text: "No rare rewards! Add some in panel ⚙️",
+      text: "No rare modifiers! Add some in panel ⚙️",
       start: 0,
       end: 2 * Math.PI,
       color: "#222222",
@@ -537,6 +543,7 @@ function drawWheel(wheelState, canvasId) {
 
     // Text wrapping or scaling for narrow slices
     let text = slice.text;
+    let displayText = (slice.isBonus && canvasId === "main-wheel-canvas") ? text : truncateText(text, 15);
     const textRadius = radius - Math.max(25, Math.round(radius * 0.1));
 
     // If it's a bonus segment on the main wheel, let's format it with a glowing look
@@ -550,7 +557,7 @@ function drawWheel(wheelState, canvasId) {
     const maxTextWidth = radius * 0.52;
     const lineHeight = Math.max(13, Math.round(fontSize * 1.15));
     const useStroke = !(slice.isBonus && canvasId === "main-wheel-canvas");
-    wrapSegmentText(ctx, text, textRadius, maxTextWidth, lineHeight, useStroke);
+    wrapSegmentText(ctx, displayText, textRadius, maxTextWidth, lineHeight, useStroke);
 
     ctx.restore();
   });
@@ -593,6 +600,12 @@ function drawWheel(wheelState, canvasId) {
   ctx.beginPath();
   ctx.arc(center, center, 28, 0, 2 * Math.PI);
   ctx.fill();
+}
+
+function truncateText(text, limit = 15) {
+  if (!text) return "";
+  if (text.length <= limit) return text;
+  return text.substring(0, limit).trim() + "...";
 }
 
 // Draw wrapped text inside narrow pie slices
@@ -642,10 +655,10 @@ function updatePointerSpring(wheelState, numSlices) {
 
   // Normalize current rotation to [0, 2PI)
   const totalRotation = wheelState.rotation % (2 * Math.PI);
-  
+
   // The physical pointer is at 12 o'clock (-PI/2 radians).
   // Position of pointer relative to the spinning wheel (moving opposite direction):
-  const pointerAngle = (2.5 * Math.PI - totalRotation) % (2 * Math.PI);
+  const pointerAngle = (3.5 * Math.PI - totalRotation) % (2 * Math.PI);
 
   // Determine current active slice index
   let activeIndex = -1;
@@ -677,7 +690,7 @@ function updatePointerSpring(wheelState, numSlices) {
   const springForce = -pointer.k * pointer.deflection;
   const dampingForce = -pointer.damping * pointer.velocity;
   const acc = springForce + dampingForce;
-  
+
   pointer.velocity += acc;
   pointer.deflection += pointer.velocity;
 
@@ -698,7 +711,7 @@ function spinMainWheel() {
   // Reset display banner
   const readout = document.getElementById("scoreboard-readout");
   readout.classList.remove("win-flash", "bonus-flash");
-  readout.textContent = "SPINNING... PLACE YOUR BETS!";
+  readout.textContent = "SPINNING FOR THIS WEEK'S RULE...";
 
   // Disable controls
   state.isSpinning = true;
@@ -737,8 +750,8 @@ function animateMainSpin() {
 function processMainLanding() {
   // Find which slice aligned at the top pointer (90 deg or 1.5 * PI)
   const totalRotation = mainWheel.rotation % (2 * Math.PI);
-  const pointerAngle = (2.5 * Math.PI - totalRotation) % (2 * Math.PI);
-  
+  const pointerAngle = (3.5 * Math.PI - totalRotation) % (2 * Math.PI);
+
   let winner = mainWheel.slices.find(slice => pointerAngle >= slice.start && pointerAngle < slice.end);
   if (!winner) winner = mainWheel.slices[0]; // fallback safety
 
@@ -747,8 +760,8 @@ function processMainLanding() {
   if (winner.isBonus) {
     // 1. Landing on the Super Awesome Bonus Wheel!
     readout.classList.add("bonus-flash");
-    readout.textContent = "★ LANDED ON BONUS WHEEL! ★";
-    
+    readout.textContent = "★ LANDED ON RARE MODIFIER WHEEL! ★";
+
     // Trigger intense sound, shake screen and firework burst
     soundEngine.playBonusCelebration();
     document.body.classList.add("screenshake");
@@ -765,10 +778,10 @@ function processMainLanding() {
     soundEngine.playWinFanfare();
     startCelebrationLoop("normal");
 
-    // Enable buttons
-    document.getElementById("spin-main-btn").disabled = false;
-    document.getElementById("open-drawer-btn").disabled = false;
-    document.getElementById("reset-defaults-btn").disabled = false;
+    // Show the detailed outcome modal after 800ms to let fanfare sink in
+    setTimeout(() => {
+      showOutcomeModal("THIS WEEK'S DRAFT RULE!", winner.text, false);
+    }, 800);
   }
 }
 
@@ -781,7 +794,7 @@ function spinBonusWheel() {
   soundEngine.playClick();
 
   const readout = document.getElementById("bonus-scoreboard-readout");
-  readout.textContent = "SPINNING FOR GLORY...";
+  readout.textContent = "SPINNING FOR MODIFIERS...";
 
   state.isSpinning = true;
   document.getElementById("spin-bonus-btn").disabled = true;
@@ -813,22 +826,22 @@ function animateBonusSpin() {
 
 function processBonusLanding() {
   const totalRotation = bonusWheel.rotation % (2 * Math.PI);
-  const pointerAngle = (2.5 * Math.PI - totalRotation) % (2 * Math.PI);
-  
+  const pointerAngle = (3.5 * Math.PI - totalRotation) % (2 * Math.PI);
+
   let winner = bonusWheel.slices.find(slice => pointerAngle >= slice.start && pointerAngle < slice.end);
   if (!winner) winner = bonusWheel.slices[0];
 
   const readout = document.getElementById("bonus-scoreboard-readout");
   readout.innerHTML = `<span class="neon-rainbow">${winner.text}</span>`;
-  
+
   // Extra fanfare
   soundEngine.playWinFanfare();
   startCelebrationLoop("bonus");
 
-  // Enable close return button
-  const closeBtn = document.getElementById("close-bonus-btn");
-  closeBtn.disabled = false;
-  closeBtn.classList.remove("disabled-btn");
+  // Show outcome modal after 800ms
+  setTimeout(() => {
+    showOutcomeModal("RARE MODIFIER UNLOCKED!", winner.text, true);
+  }, 800);
 }
 
 /* ==========================================================================
@@ -840,9 +853,9 @@ function openBonusOverlay() {
   overlay.classList.remove("hidden");
 
   // Reset values
-  document.getElementById("bonus-scoreboard-readout").textContent = "SPIN FOR RARE REWARDS!";
+  document.getElementById("bonus-scoreboard-readout").textContent = "SPIN FOR RARE DRAFT MODIFIERS!";
   document.getElementById("spin-bonus-btn").disabled = false;
-  
+
   const closeBtn = document.getElementById("close-bonus-btn");
   closeBtn.disabled = true;
   closeBtn.classList.add("disabled-btn");
@@ -855,7 +868,7 @@ function openBonusOverlay() {
 function closeBonusOverlay() {
   initAudio();
   soundEngine.playClick();
-  
+
   state.isBonusActive = false;
   const overlay = document.getElementById("bonus-wheel-overlay");
   overlay.classList.add("hidden");
@@ -866,9 +879,48 @@ function closeBonusOverlay() {
   document.getElementById("reset-defaults-btn").disabled = false;
 
   stopCelebrationLoop();
-  
+
   // Draw main wheel back
   drawWheel(mainWheel, "main-wheel-canvas");
+}
+
+function showOutcomeModal(title, text, isBonus = false) {
+  const modal = document.getElementById("outcome-modal");
+  const modalTitle = document.getElementById("outcome-modal-title");
+  const modalText = document.getElementById("outcome-modal-text");
+  const closeBtn = document.getElementById("outcome-modal-close-btn");
+
+  modalTitle.textContent = title;
+  modalText.textContent = text;
+
+  if (isBonus) {
+    modal.classList.add("bonus-reward");
+    closeBtn.querySelector(".btn-cap").textContent = "CLAIM MODIFIER";
+  } else {
+    modal.classList.remove("bonus-reward");
+    closeBtn.querySelector(".btn-cap").textContent = "LOCK IN RULE";
+  }
+
+  modal.classList.remove("hidden");
+}
+
+function hideOutcomeModal() {
+  const modal = document.getElementById("outcome-modal");
+  modal.classList.add("hidden");
+
+  stopCelebrationLoop();
+
+  // Re-enable page actions based on active wheel mode
+  if (state.isBonusActive) {
+    document.getElementById("spin-bonus-btn").disabled = false;
+    const closeBtn = document.getElementById("close-bonus-btn");
+    closeBtn.disabled = false;
+    closeBtn.classList.remove("disabled-btn");
+  } else {
+    document.getElementById("spin-main-btn").disabled = false;
+    document.getElementById("open-drawer-btn").disabled = false;
+    document.getElementById("reset-defaults-btn").disabled = false;
+  }
 }
 
 /* ==========================================================================
@@ -880,7 +932,7 @@ class Particle {
     this.y = y;
     this.color = color;
     this.isShell = isFireworkShell;
-    
+
     if (this.isShell) {
       // Launch parameters
       this.vx = (Math.random() - 0.5) * 4;
@@ -967,7 +1019,7 @@ function startCelebrationLoop(type) {
   particles = [];
   const canvas = document.getElementById("celebration-canvas");
   const ctx = canvas.getContext("2d");
-  
+
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
 
@@ -1037,7 +1089,7 @@ function stopCelebrationLoop() {
 function setupLEDLights() {
   const outerRing = document.getElementById("led-outer-ring");
   const bonusRing = document.getElementById("bonus-led-ring");
-  
+
   createLEDs(outerRing, 28);
   createLEDs(bonusRing, 20);
 
@@ -1047,7 +1099,7 @@ function setupLEDLights() {
 function createLEDs(container, count) {
   if (!container) return;
   container.innerHTML = "";
-  
+
   const radius = 50; // percentage based radius
   for (let i = 0; i < count; i++) {
     const angle = (i * 360 / count) * Math.PI / 180;
@@ -1071,7 +1123,7 @@ function startLEDChase(mode) {
   activeLEDInterval = setInterval(() => {
     tick++;
     const bulbs = document.querySelectorAll(".led-bulb");
-    
+
     bulbs.forEach((bulb, index) => {
       // Reset classes
       bulb.className = "led-bulb";
@@ -1190,7 +1242,7 @@ document.addEventListener("DOMContentLoaded", () => {
     reader.onload = (event) => {
       try {
         const importedData = JSON.parse(event.target.result);
-        
+
         // Validate imported schema
         if (Array.isArray(importedData.mainItems) && Array.isArray(importedData.bonusItems)) {
           state.mainItems = importedData.mainItems;
@@ -1299,6 +1351,19 @@ document.addEventListener("DOMContentLoaded", () => {
     startLEDChase("idle");
   });
 
+  // Modal Event Listeners
+  document.getElementById("outcome-modal-close-btn").addEventListener("click", () => {
+    initAudio();
+    soundEngine.playClick();
+    hideOutcomeModal();
+  });
+
+  document.getElementById("outcome-modal-backdrop").addEventListener("click", () => {
+    initAudio();
+    soundEngine.playClick();
+    hideOutcomeModal();
+  });
+
   document.getElementById("force-bonus-btn").addEventListener("click", () => {
     // Close the drawer first so the user sees the celebration on the main screen
     document.getElementById("config-drawer").classList.remove("open");
@@ -1314,7 +1379,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const readout = document.getElementById("scoreboard-readout");
     readout.classList.remove("win-flash");
     readout.classList.add("bonus-flash");
-    readout.textContent = "★ FORCED BONUS WHEEL! ★";
+    readout.textContent = "★ FORCED RARE MODIFIERS! ★";
 
     soundEngine.playBonusCelebration();
     document.body.classList.add("screenshake");

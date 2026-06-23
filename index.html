@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MTG Commander League - Game Show Wheel</title>
+  <title>MTG Commander League - Weekly Draft Rule Wheel</title>
   <!-- SEO Meta Tags -->
   <meta name="description"
     content="A highly interactive, retro game show-themed spin wheel app for MTG Commander League challenges, rare bonus items, and neon celebration aesthetics.">
@@ -37,16 +37,16 @@
       </div>
 
       <div class="drawer-tabs">
-        <button id="tab-main-btn" class="tab-btn active">Main Wheel</button>
-        <button id="tab-bonus-btn" class="tab-btn">Bonus Wheel</button>
+        <button id="tab-main-btn" class="tab-btn active">Drafting Rules</button>
+        <button id="tab-bonus-btn" class="tab-btn">Rare Modifiers</button>
         <button id="tab-sync-btn" class="tab-btn">Sync</button>
       </div>
 
       <div class="drawer-content">
         <!-- Main Wheel Items Config -->
         <div id="tab-main-content" class="tab-panel active">
-          <h3>Main Items</h3>
-          <p class="tab-help">Add items for the main wheel. Note: The <strong>Bonus Wheel</strong> segment is
+          <h3>Weekly Draft Rules</h3>
+          <p class="tab-help">Add potential drafting rules for the weekly selector. Note: The <strong>Rare Modifiers</strong> segment is
             permanently added!</p>
           <div class="item-list-container">
             <ul id="main-items-list" class="styled-list">
@@ -54,23 +54,23 @@
             </ul>
           </div>
           <form id="add-main-item-form" class="add-form">
-            <input type="text" id="new-main-item" placeholder="Enter challenge or reward..." required maxlength="60">
-            <button type="submit" class="add-btn" title="Add to Main Wheel">➕ Add</button>
+            <input type="text" id="new-main-item" placeholder="Enter draft rule..." required maxlength="60">
+            <button type="submit" class="add-btn" title="Add to Drafting Rules">➕ Add</button>
           </form>
         </div>
 
         <!-- Bonus Wheel Items Config -->
         <div id="tab-bonus-content" class="tab-panel">
-          <h3>Super Rare Items</h3>
-          <p class="tab-help">Options available when landing on the Super Awesome Bonus Wheel slot.</p>
+          <h3>Rare Modifier Rules</h3>
+          <p class="tab-help">Rare modifier rules applied when landing on the Super Awesome Bonus Wheel slot.</p>
           <div class="item-list-container">
             <ul id="bonus-items-list" class="styled-list">
               <!-- Dynamically populated -->
             </ul>
           </div>
           <form id="add-bonus-item-form" class="add-form">
-            <input type="text" id="new-bonus-item" placeholder="Enter rare item..." required maxlength="60">
-            <button type="submit" class="add-btn" title="Add to Bonus Wheel">➕ Add</button>
+            <input type="text" id="new-bonus-item" placeholder="Enter rare modifier rule..." required maxlength="60">
+            <button type="submit" class="add-btn" title="Add to Rare Modifiers">➕ Add</button>
           </form>
         </div>
 
@@ -105,7 +105,7 @@
         </div>
         <button id="force-bonus-btn" class="pulse-btn"
           style="width: 100%; margin-bottom: 12px; border-color: var(--neon-gold); color: var(--neon-gold); font-size: 0.8rem;">★
-          Force Bonus Wheel ★</button>
+          Force Rare Modifier Wheel ★</button>
         <button id="reset-defaults-btn" class="danger-btn">Reset Defaults</button>
       </div>
     </aside>
@@ -114,8 +114,8 @@
     <main class="game-stage">
       <header class="game-header">
         <div class="logo-container">
-          <h1 class="neon-title" data-text="EDH SHOWDOWN">EDH LEAGUE</h1>
-          <span class="neon-subtitle">★ WHEEL OF DECKBUILDING ★</span>
+          <h1 class="neon-title" data-text="EDH DRAFT RULES">EDH DRAFT RULES</h1>
+          <span class="neon-subtitle">★ WEEKLY DRAFT RULE WHEEL ★</span>
         </div>
         <button id="open-drawer-btn" class="pulse-btn" title="Configure Wheel">⚙️ Setup Panel</button>
       </header>
@@ -124,7 +124,7 @@
       <section class="scoreboard-container">
         <div class="scoreboard-frame">
           <div id="scoreboard-readout" class="scoreboard-readout marquee-glow">
-            SPIN THE WHEEL OF DESTINY!
+            SPIN FOR THIS WEEK'S DRAFT RULE!
           </div>
         </div>
       </section>
@@ -165,13 +165,13 @@
     <div class="bonus-cabinet-wrapper">
       <div class="bonus-marquee">
         <h2 class="bonus-title neon-rainbow">★ SUPER AWESOME ★</h2>
-        <h3 class="bonus-subtitle">BONUS WHEEL OF AWESOMENESS</h3>
+        <h3 class="bonus-subtitle">WEEKLY DRAFT MODIFIER WHEEL</h3>
       </div>
 
       <!-- Scoreboard for bonus outcomes -->
       <div class="bonus-scoreboard">
         <div id="bonus-scoreboard-readout" class="bonus-scoreboard-readout">
-          SPIN FOR RARE REWARDS!
+          SPIN FOR RARE DRAFT MODIFIERS!
         </div>
       </div>
 
@@ -188,7 +188,25 @@
         <button id="spin-bonus-btn" class="arcade-spin-btn gold-btn">
           <span class="btn-cap">SPIN!</span>
         </button>
-        <button id="close-bonus-btn" class="text-link-btn disabled-btn" disabled>Return to Main Game</button>
+        <button id="close-bonus-btn" class="text-link-btn disabled-btn" disabled>Apply Modifier & Return</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- High-Impact Outcome Modal -->
+  <div id="outcome-modal" class="outcome-modal hidden">
+    <div class="outcome-modal-backdrop" id="outcome-modal-backdrop"></div>
+    <div class="outcome-modal-content">
+      <div class="outcome-modal-header">
+        <h2 id="outcome-modal-title" class="outcome-modal-title">CHALLENGE UNLOCKED!</h2>
+      </div>
+      <div class="outcome-modal-body">
+        <p id="outcome-modal-text" class="outcome-modal-text"></p>
+      </div>
+      <div class="outcome-modal-footer">
+        <button id="outcome-modal-close-btn" class="pulse-btn outcome-close-btn">
+          <span class="btn-cap">ACCEPT CHALLENGE</span>
+        </button>
       </div>
     </div>
   </div>
